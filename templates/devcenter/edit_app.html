@@ -1,0 +1,742 @@
+{% extends "base_devcenter.html" %}
+
+{% block more_js %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/easy.notification.js"></script>
+{% endblock %}
+
+{% block internal_js %}
+<script type="text/javascript">
+//Send message
+displayNotification('');
+
+function changeTab(tabname) {
+	document.getElementById('app_info').style.display = 'none';
+	document.getElementById('apk_list').style.display = 'none';
+	document.getElementById('edit_images').style.display = 'none';
+	document.getElementById('apk_upload').style.display = 'none';
+	
+	if (tabname) {
+		document.getElementById(tabname).style.display = 'block';
+	}
+}
+
+//////////Basic information//////////////
+function onClickUpdateApp() {
+	//Input check
+	if (checkBasicInfoForm() == false) {
+		return;
+	}
+	
+	httpObj = createXMLHttpRequest(onResultUpdateApp);
+	httpObj.open("POST", "/devcenter/update_app", false);
+	httpObj.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+    var frm = document.update_app;
+    var postdata = "app_id=" + frm.elements['app_id'].value;
+    postdata += "&app_name=" + frm.elements['app_name'].value;
+    postdata += "&description=" + frm.elements['description'].value;
+    // CSRF
+    postdata += "&csrfmiddlewaretoken=" + getCookie('csrftoken');
+    
+//    alert(postdata);//debug
+    httpObj.send(postdata);	
+}
+
+function checkBasicInfoForm(){
+	var flag = 0;
+	if (document.update_app.app_name.value == "") {
+		flag = 1;
+		changeAlert('tr_app_name', true);
+	} else {
+		changeAlert('tr_app_name', false);
+	}
+	
+	if (document.update_app.description.value == "") {
+		flag = 1;
+		changeAlert('tr_description', true);
+	} else {
+		changeAlert('tr_description', false);
+	}
+	
+	if (flag) {
+		window.alert("You have a field missed to input"); // Display warning dialog in input miss
+		return false; // Stop sending
+	}
+	else{
+		return true; // Execute sending
+	}
+}
+
+function changeAlert(id, flg) {
+	if (flg) {
+		document.getElementById(id).setAttribute('bgcolor', 'red');
+	} else {
+		document.getElementById(id).removeAttribute('bgcolor');
+	}
+}
+
+function onResultUpdateApp() {
+    if ((httpObj.readyState == 4) && (httpObj.status == 200)) {
+        var res_data = httpObj.responseText;
+
+        // parse JSON data {'apk_id': xxx, 'passwd' : yyy}
+		var result = eval("(" + res_data + ")");
+		var status = result.status;
+
+		if (status == "done")
+       	displayNotification("Update completed");
+		else
+			displayNotification("Fail to update into DB");
+    } else if (httpObj.readyState == 4) {
+        displayNotification("Fail to update(" + httpObj.status + ")");
+    }
+}
+
+
+///////////////Apk list/////////////////////
+
+//When it is pressed to edit changes
+function onClickEditRecentChange(apk_id) {
+	document.getElementById('recent_change_display_area_' + apk_id).style.display = 'none';
+	document.getElementById('recent_change_edit_area_' + apk_id).style.display = 'block';
+}
+
+//When it is pressed to complete editing changes
+function onClickUpdateRecentChange(apk_id) {
+    httpObj = createXMLHttpRequest(onResultUpdateRecentChange);
+    httpObj.open("POST", "/devcenter/update_recent_change", false);
+    httpObj.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    
+    var postdata = "apk_id=" + apk_id;
+    postdata += "&recent_change=" + document.getElementsByName('recent_change_text_' + apk_id)[0].value;
+    // CSRF
+    postdata += "&csrfmiddlewaretoken=" + getCookie('csrftoken');
+    
+    //alert(postdata);//debug
+    httpObj.send(postdata);
+}
+
+function onResultUpdateRecentChange() {
+	if ((httpObj.readyState == 4) && (httpObj.status == 200)) {
+		var res_data = httpObj.responseText;
+        
+		// parse JSON data {'apk_id': xxx, 'recent_change' : yyy}
+		var result = eval("(" + res_data + ")");
+		var apk_id = result.apk_id;
+		var recent_change = result.recent_change;
+        
+		document.getElementsByName('recent_change_text_' + apk_id)[0].value = recent_change;
+		document.getElementById('recent_change_display_area_' + apk_id).childNodes[0].nodeValue = recent_change;
+
+		document.getElementById('recent_change_display_area_' + apk_id).style.display = 'block';
+		document.getElementById('recent_change_edit_area_' + apk_id).style.display = 'none';
+	} else if (httpObj.readyState == 4) {
+        alert("Fail to update Changes(" + httpObj.status + ")");
+    }
+    //gotoApkListPage('apk_list', 32,23);
+}
+
+//When it is pressed to edit password
+function onClickEditPasswd(apk_id) {
+	document.getElementById('passwd_display_area_' + apk_id).style.display = 'none';
+	document.getElementById('passwd_edit_area_' + apk_id).style.display = 'block';
+}
+
+//When it is pressed to complete editing password
+function onClickUpdatePasswd(apk_id) {
+    httpObj = createXMLHttpRequest(onResultUpdatePasswd);
+    httpObj.open("POST", "/devcenter/update_passwd", false);
+    httpObj.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    
+    var postdata = "apk_id=" + apk_id;
+    postdata += "&passwd=" + document.getElementsByName('passwd_text_' + apk_id)[0].value;
+    // CSRF
+    postdata += "&csrfmiddlewaretoken=" + getCookie('csrftoken');
+    
+//    alert(postdata);//debug
+    httpObj.send(postdata);
+}
+
+function onResultUpdatePasswd() {
+    if ((httpObj.readyState == 4) && (httpObj.status == 200)) {
+        var res_data = httpObj.responseText;
+        
+     // parse JSON data {'apk_id': xxx, 'passwd' : yyy}
+		var result = eval("(" + res_data + ")");
+		var apk_id = result.apk_id;
+		var passwd = result.passwd;
+		
+		document.getElementsByName('passwd_text_' + apk_id)[0].value = passwd;
+		document.getElementById('passwd_display_area_' + apk_id).childNodes[0].nodeValue = passwd;
+
+		document.getElementById('passwd_display_area_' + apk_id).style.display = 'block';
+		document.getElementById('passwd_edit_area_' + apk_id).style.display = 'none';
+		
+	} else if (httpObj.readyState == 4) {
+        alert("Fail to update Password(" + httpObj.status + ")");
+    }
+    //gotoApkListPage('apk_list', 32,23);
+}
+
+///////////////Edit images/////////////////////
+function onClickChangeIcon() {
+	document.getElementById('submit_icon').style.display = 'block';
+}
+
+//This function is called after upload icon by file_upload_result.html
+function ResultUploadIcon(icon_id, error_msg) {
+	if (error_msg == '') {
+		var icon_result = document.getElementById('upload_icon_result');
+		
+		var img_html = '<img width=\'50px\' height=\'50px\' src=\'/devcenter/icon/' + icon_id + '\' />';
+		img_html += '<br><center><a href=\'#\' onclick=\'onClickChangeIcon()\'>change</a></center>';
+		icon_result.innerHTML = img_html;
+	
+		document.getElementById('submit_icon').style.display = 'none';
+		
+		// change title icon
+		var title_icon = document.images['title_icon'];
+		title_icon.src = '/devcenter/icon/' + icon_id;
+	}
+
+	// display error message
+	var msg_block = document.getElementById('icon_error');
+	var inner_html = error_msg;
+	msg_block.innerHTML = inner_html;
+}
+
+//This function is called after upload Captured Images by file_upload_result.html
+function ResultUploadCImage(cimage_id, error_msg) {
+	if (cimage_id > 0) {
+		var new_cimage = document.createElement('div');
+		new_cimage.setAttribute('id', 'cimage_' + cimage_id);
+		new_cimage.setAttribute('class', 'cimage_class');
+	
+		var html = '<img width=\'100px\' height=\'100px\' src=\'/devcenter/cimage/' + cimage_id + '\' />';
+		html += '<br/><center><a href=\'#\' onClick=\'onClickChangeCImage(' + cimage_id + ')\'>change</a> /';
+		html += '<a href=\'#\' onClick=\'onClickDeleteCImage(' + cimage_id + ')\'>delete</a></center>';
+	
+		new_cimage.innerHTML = html;
+	
+		var cimage_result = document.getElementById('upload_cimage_result');
+		cimage_result.appendChild(new_cimage);
+		
+		if (cimage_result.style.display == 'none')
+			cimage_result.style.display = 'block';
+	}
+	
+	// display error message
+	var msg_block = document.getElementById('cimage_error');
+	var inner_html = error_msg;
+	msg_block.innerHTML = inner_html;
+}
+
+function onClickChangeCImage(cimage_id) {
+	document.getElementById('submit_add_cimage').style.display = 'none';
+	
+	// set cimage_id value of "change_cimage" form
+	document.change_cimage.cimage_id.value = cimage_id;
+	document.getElementById('submit_change_cimage').style.display = 'block';
+	
+}
+
+function ResultChangeCImage(cimage_id, error_msg) {
+	if (cimage_id > 0) {
+		var cimage_result = document.getElementById('cimage_' + cimage_id);
+
+		var html = '<img width=\'100px\' height=\'100px\' src=\'/devcenter/cimage/' + cimage_id + '\' />';
+		html += '<br/><center><a href=\'#\' onClick=\'onClickChangeCImage(' + cimage_id + ')\'>change</a> /';
+		html += '<a href=\'#\' onClick=\'onClickDeleteCImage(' + cimage_id + ')\'>delete</a></center>';
+
+		cimage_result.innerHTML = html;
+	
+		if (cimage_result.style.display == 'none')
+			cimage_result.style.display = 'block';
+		
+		document.getElementById('submit_add_cimage').style.display = 'block';
+		document.getElementById('submit_change_cimage').style.display = 'none';
+		
+	}
+	
+	// display error message
+	var msg_block = document.getElementById('cimage_error');
+	var inner_html = error_msg;
+	msg_block.innerHTML = inner_html;
+}
+
+//When click delete button of each captured image
+function onClickDeleteCImage(cimage_id) {
+	httpObj = createXMLHttpRequest(onResultDeleteCImage);
+	httpObj.open("POST", "/devcenter/delete_cimage", false);
+	httpObj.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	
+	var postdata = "cimage_id=" + cimage_id;
+    // CSRF
+    postdata += "&csrfmiddlewaretoken=" + getCookie('csrftoken');
+    
+    //alert(postdata);//debug
+    httpObj.send(postdata);	
+}
+
+function onResultDeleteCImage() {
+	if ((httpObj.readyState == 4) && (httpObj.status == 200)) {
+		var res_data = httpObj.responseText;
+
+		var result = eval("(" + res_data + ")");
+		
+		if (result.status == "OK") {
+			var item = document.getElementById('cimage_' + result.cimage_id);
+			
+			if (item != null) {
+				item.parentNode.removeChild(item);
+
+				// display error message
+				var msg_block = document.getElementById('cimage_error');
+				var inner_html = '';
+				msg_block.innerHTML = inner_html;
+			}
+			document.getElementById('submit_add_cimage').style.display = 'block';
+			document.getElementById('submit_change_cimage').style.display = 'none';
+		} else {
+			alert("Fail to delete captured image");
+		}
+		
+	} else if (httpObj.readyState == 4) {
+		alert("Fail to Create App(" + httpObj.status + ")");
+	}
+}
+
+function onClickChangePImage() {
+	document.getElementById('submit_pimage').style.display = 'block';
+}
+
+//This function is called after upload Promotion Image by file_upload_result.html
+function ResultUploadPImage(pimage_id, error_msg) {
+	if (error_msg == '') {
+		var pimage_result = document.getElementById('upload_pimage_result');
+		
+		var img_html = '<img width=\'200px\' height=\'150px\' src=\'/devcenter/pimage/' + pimage_id + '\' />';
+		img_html += '<br><center><a href=\'#\' onclick=\'onClickChangePImage()\'>change</a> /';
+		img_html += '<a href=\'#\' onclick=\'onClickDeletePImage(' + pimage_id + ')\'>delete</a></center>';
+		pimage_result.innerHTML = img_html;
+	
+		document.getElementById('submit_pimage').style.display = 'none';
+		
+		if (pimage_result.style.display == 'none')
+			pimage_result.style.display = 'block';
+	}
+
+	// display error message
+	var msg_block = document.getElementById('pimage_error');
+	var inner_html = error_msg;
+	msg_block.innerHTML = inner_html;
+}
+
+//When click delete button of each promotion image
+function onClickDeletePImage(app_id) {
+	httpObj = createXMLHttpRequest(onResultDeletePImage);
+	httpObj.open("POST", "/devcenter/delete_pimage", false);
+	httpObj.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	
+	var postdata = "app_id=" + app_id;
+    // CSRF
+    postdata += "&csrfmiddlewaretoken=" + getCookie('csrftoken');
+    
+    //alert(postdata);//debug
+    httpObj.send(postdata);	
+}
+
+function onResultDeletePImage() {
+	if ((httpObj.readyState == 4) && (httpObj.status == 200)) {
+		var res_data = httpObj.responseText;
+
+		var result = eval("(" + res_data + ")");
+		
+		if (result.status == "OK") {
+			var item = document.getElementById('upload_pimage_result');
+			
+			item.innerHTML = '';
+
+			document.getElementById('submit_pimage').style.display = 'block';
+
+			// display error message
+			var msg_block = document.getElementById('pimage_error');
+			var inner_html = '';
+			msg_block.innerHTML = inner_html;
+			
+		} else {
+			alert("Fail to delete captured image");
+		}
+		
+	} else if (httpObj.readyState == 4) {
+		alert("Fail to Create App(" + httpObj.status + ")");
+	}
+}
+
+///////////////Apk upload/////////////////////
+// After upload apk file
+function ResultUploadAPK(apk_id, error_msg) {
+	if (error_msg == '') {
+		document.getElementById('apk_file_upload_view').style.display = 'none';
+		document.getElementById('apk_rchange_upload_view').style.display = 'block';
+	
+		document.getElementById('id_apk_id').value = apk_id;
+	} else {
+		// display error message
+		var msg_block = document.getElementById('upload_apk_error');
+		var inner_html = error_msg;
+		msg_block.innerHTML = inner_html;
+	}
+}
+
+//Processing valid/invalid text field of download-password
+function onChangePasswdCheck() {
+	if(document.getElementsByName('passwd_check')[1].checked) {
+		document.getElementsByName('passwd')[0].disabled = false;
+	} else {
+		document.getElementsByName('passwd')[0].disabled = true;
+	}
+}
+
+// When clicked Save Apk Info
+function onClickSaveApkInfo() {
+	httpObj = createXMLHttpRequest(onResultSaveApkInfo);
+	httpObj.open("POST", "/devcenter/upload_info", false);
+	httpObj.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+	var postdata = "recent_change=" + document.getElementById('id_recent_change').value;
+
+	if(document.getElementsByName('passwd_check')[0].checked) {
+		postdata += "&passwd_check=" + document.getElementsByName('passwd_check')[0].value;
+	} else {
+		postdata += "&passwd_check=" + document.getElementsByName('passwd_check')[1].value;
+	}
+
+	postdata += "&passwd=" + document.getElementById('id_passwd').value;
+	postdata += "&apk_id=" + document.getElementById('id_apk_id').value;
+	// CSRF
+	postdata += "&csrfmiddlewaretoken=" + getCookie('csrftoken');
+
+	//alert(postdata);//debug
+	httpObj.send(postdata);
+}
+
+// After handle Save Apk Info
+function onResultSaveApkInfo() {
+	if ((httpObj.readyState == 4) && (httpObj.status == 200)) {
+		var res_data = httpObj.responseText;
+
+		var result = eval("(" + res_data + ")");
+		
+		if (result.status == "OK") {
+			gotoPage('/devcenter/edit_app', result.author_id, result.app_id);
+		} else {
+			showEditUploadInfoError(result);
+		}
+		
+	} else if (httpObj.readyState == 4) {
+		alert("Fail to Create App(" + httpObj.status + ")");
+	}
+
+}
+
+//show error cases about the empty fields of Edit Upload APK Information
+function showEditUploadInfoError(result) {
+	var inner_html = '';
+	var error_block;
+
+	// display recent_change field error
+	error_block = document.getElementById('recent_change_error');
+	inner_html = result.recent_change_error;
+	
+	error_block.innerHTML = inner_html;
+}
+
+</script>
+{% endblock %}
+
+
+{% block body_onload %}
+onload="changeTab('app_info')"
+{% endblock %}
+
+{% block pr %}
+{% if user.is_authenticated %}
+<div class="pr">
+	<h4>
+		<a href='javascript:void(0)'  id='jquery-api-slideDown-fast'>{{ user.username }}({{ user.email }})</a><br>
+		<div id='jquery-api-slideDown-fast-contents'<br>
+			<a href='javascript:void(0)' onClick='gotoEditAuthorPage(28)'>Edit profile</a><br>
+			<a href='/devcenter/logout/'>Log-out</a><br>
+		</div>
+	</h4>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block content %} 
+		<div id="contents">
+			<div id="main">
+				<h2>Edit Application(package name: {{ app.package_name }})<br>
+					<img name='title_icon' style='vertical-align: middle' width='22px' height='22px' src='/devcenter/icon/{{ app.id }}'>
+					{{ app.app_name }}
+				</h2>				
+				<div id="menu">
+					<ul>
+						<li><a href='javascript:void(0)' onClick="changeTab('app_info')">Application information</a>
+						</li>
+						<li><a href='javascript:void(0)' onClick="changeTab('apk_list')">Apk list</a>
+						</li>
+						<li><a href='javascript:void(0)' onClick="changeTab('edit_images')">Edit images</a>
+						</li>
+						<li><a href='javascript:void(0)' onClick="changeTab('apk_upload')">Apk upload</a>
+						</li>
+					</ul>
+				</div>
+				<!-- menu end -->
+
+				<!-- app_info start -->
+				<div id='app_info' style="display: none;">
+					<h4>Application information</h4>
+					<br>
+					<form action='#' name='update_app'>
+						<table>
+							<tr id='tr_app_name'>
+								<th align='right'>Application name:</th>
+								<td>
+									<input type='text' name='app_name' size='100' style='ime-mode: disabled' value='{{ app.app_name }}'>
+								</td>
+							</tr>
+							<tr id='tr_description'>
+								<th align='right'>Application comment:</th>
+								<td><textarea cols='100' rows='6' name="description">{{ app.description }}</textarea>
+								</td>
+							</tr>
+						</table>
+						<input type='hidden' name='app_id' value='{{ app.id }}'>
+						<input type='button' value='Update' onClick='onClickUpdateApp()'> <br>
+					</form>
+				</div>
+				<!-- app_info end -->
+
+				<!-- app_list start -->
+				<div id='apk_list' style="display: none;">
+					<h4>Apk list</h4>
+					<br>
+					<table border='0'>
+						<tr>
+							<th>Version</th><th>Upload date</th><th>Changes</th><th>Download counts</th><th>Password</th>
+						</tr>
+						{% for apk in apk_list %}
+						<tr>
+							<td width='50px' align='right'>{{apk.version_name}}({{apk.version_code}})</td>
+							<td width='200px' align='center'>{{apk.update_date_time}}</td>
+							<td width='300px' align='left'>
+								<div id='recent_change_display_area_{{ apk.id }}'>{{apk.recent_change}}<br><a href='javascript:void(0)' onClick=onClickEditRecentChange({{ apk.id }})>[Edit]</a></div>
+								<div id='recent_change_edit_area_{{ apk.id }}' style='display: none;'>
+									<textarea cols='40' rows='6' name='recent_change_text_{{ apk.id }}'>{{apk.recent_change}}</textarea><br>
+									<input type='button' value='Update' onClick=onClickUpdateRecentChange({{ apk.id }})>
+								</div>
+							</td>
+							<td width='100px' align='right'>0count</td>
+							<td width='150px' align='right'>
+								<div id='passwd_display_area_{{ apk.id }}'>
+									{% if not apk.passwd %}
+										No Setting
+									{% else %}
+										{{ apk.passwd }}
+									{% endif %}
+									<br>
+									<a href='javascript:void(0)' onClick=onClickEditPasswd({{ apk.id }})>[Edit]</a>
+								</div>
+								<div id='passwd_edit_area_{{ apk.id }}' style='display: none;'>
+									<input type='text' name='passwd_text_{{ apk.id }}' value='{{ apk_passwd }}'><br>
+									<input type='button' value='Update' onClick=onClickUpdatePasswd({{ apk.id }})>
+								</div>
+							</td>
+						</tr>
+						{% endfor %}
+					</table>
+				</div>
+				<!-- apk_info end -->
+
+				<!-- edit_images start -->
+				<div id='edit_images' style="display: none;">
+					<h4>Edit Images</h4>
+					<br>
+				<h4>Upload Images</h4>
+					<table>
+						<!--  Icon upload Start -->
+						<tr>
+							<th align='right' width='100px'>Icon:</th>
+							<td width='600px'>
+								<div id="submit_icon" style="display: none;">
+									<form action="/devcenter/upload_icon" method="post" enctype="multipart/form-data" target="file_upload_target">
+										{% csrf_token %}
+										<input type="file" name="icon" />
+										<input type="hidden" name="app_id" value="{{ app.id }}" />
+										<input type="submit" name="submit_icon" value="Upload Icon" />
+									</form>
+								</div>
+								<div id="upload_icon_result" class="icon_class">
+									<img width="50px" height="50px" src="/devcenter/icon/{{ app.id }}">
+									<br>
+									<center>
+										<a href="#" onclick="onClickChangeIcon()">change</a>
+									</center>
+								</div>
+							</td>						
+							<td align='left'>
+								<div>Please upload icon image.</div>
+								<div id='icon_error' class='error_msg'></div>
+							</td>						
+						</tr>
+						<!--  Icon upload End -->
+						<!--  Captured Image upload Start -->
+						<tr>
+							<th align='right' width='100px'>Captured Image:</th>
+							<td width='600px'>
+								<div id="submit_add_cimage">
+									<form action="/devcenter/upload_cimage" method="post" enctype="multipart/form-data" target="file_upload_target">
+										{% csrf_token %}
+										<label>add: </label>
+										<input type="file" name="cimage" />
+										<input type="hidden" name="app_id" value="{{ app.id }}" />
+										<input type="submit" name="submit_add_cimage" value="Add Image" />
+									</form>
+								</div>
+								<div id="submit_change_cimage" style="display:none;">
+									<form name="change_cimage" action="/devcenter/change_cimage" method="post" enctype="multipart/form-data" target="file_upload_target">
+										{% csrf_token %}
+										<label>change: </label>
+										<input type="file" name="cimage" />
+										<input type="hidden" name="cimage_id" value="" />
+										<input type="submit" name="submit_change_cimage" value="Change Image" />
+									</form>
+								</div>
+								<div id="upload_cimage_result">
+									{% for cimage in cimage_list %}
+									<div id="cimage_{{ cimage.id }}" class="cimage_class">
+										<img width="100px" height="100px" src="/devcenter/cimage/{{ cimage.id }}">
+										<br>
+										<center>
+											<a href="#" onclick="onClickChangeCImage({{ cimage.id }})">change</a> /
+											<a href="#" onclick="onClickDeleteCImage({{ cimage.id }})">delete</a>
+										</center>
+									</div>
+									{% endfor %}
+								</div>
+							</td>						
+							<td align='left'>
+								<div>Please upload Captured images.<br/>You can upload image more than one.</div>
+								<div id='cimage_error' class='error_msg'></div> 
+							</td>						
+						</tr>
+						<!--  Captured Image upload End -->
+						<!--  Promotion Image upload Start -->
+						<tr>
+							<th align='right' width='100px'>Promotion Image:</th>
+							<td width='600px'>
+								{% if app.pimage_name == '' %}
+								<div id="submit_pimage"">
+								{% else %}
+								<div id="submit_pimage" style="display: none;">
+								{% endif %}
+									<form action="/devcenter/upload_pimage" method="post" enctype="multipart/form-data" target="file_upload_target">
+										{% csrf_token %}
+										<input type="file" name="pimage" />
+										<input type="hidden" name="app_id" value="{{ app.id }}" />
+										<input type="submit" name="submit_pimage" value="Upload Image" />
+									</form>
+								</div>
+								{% if app.pimage_name == '' %}
+								<div id="upload_pimage_result" class="pimage_class" style="display: none;">
+								{% else %}
+								<div id="upload_pimage_result" class="pimage_class">
+								{% endif %}
+									<img width="200px" height="150px" src="/devcenter/pimage/{{ app.id }}">
+									<br>
+									<center>
+										<a href="#" onclick="onClickChangePImage()">change</a> /
+										<a href="#" onclick="onClickDeletePImage({{ app.id }})">delete</a>
+									</center>
+								</div>
+							</td>						
+							<td align='left'>
+								<div>Please upload promotion image.<br/>If you don't want promotion, this upload doesn't need.</div>
+								<div id='pimage_error' class='error_msg'></div>
+							</td>						
+						</tr>
+						<!--  Promotion Image upload End -->
+					</table>
+				<br/>
+				</div>
+				<!-- edit_images end -->
+
+				<!--  apk_upload start -->
+				<div id='apk_upload' style="display: none;">
+					<div id = "apk_file_upload_view">
+						<h4>Apk Upload</h4>
+						<br />
+						<p>
+							<i>
+								- Please input different filename with that of uploaded before.<br />
+								- Please make version code increment.<br />
+								- Max file size to upload is 8MB.
+							</i>
+						</p>
+						<br />
+						<div id="upload_apk_error" class="error_msg">
+						</div>
+						<br />
+						<p>
+							<form method="POST"	action="/devcenter/upload_apk" enctype="multipart/form-data" target="file_upload_target">
+								{% csrf_token %}
+								<!-- <input type="file" name="apk_name" />  -->
+								{{ apk_file_form }}
+								<input type="hidden" name="app_id" value="{{ app.id }}">
+								<input type="submit" value="Upload" />
+							</form>
+						</p>
+					</div>
+
+					<div id="apk_rchange_upload_view" style="display: none">
+						<h4>Apk information</h4>
+						<table>
+							<tr>
+								<th align='right'>Changes:</th>
+								<td>
+									<div id='recent_change_error' class='error_msg'></div>
+									<!-- <textarea id="id_recent_change" rows="6" cols="100" name="recent_change"></textarea> -->
+									{{ apk_info_form.recent_change }}
+								</td>
+							</tr>
+							<tr>
+								<th align='right'>Download-password</th>
+								<td>
+									<!--  <label><input value="N" type="radio" name="passwd_check" onClick="onChangePasswdCheck()" checked="checked" /> No Set</label>  -->
+									{{ apk_info_form.passwd_check.0 }}
+									<!-- <label><input value="S" type="radio" name="passwd_check" onClick="onChangePasswdCheck()" /> Set</label> -->
+									{{ apk_info_form.passwd_check.1 }}
+									<br/>
+									<!-- <input disabled="True" type="password" name="passwd" value="" id="id_passwd" /> -->
+									{{ apk_info_form.passwd }}
+								</td>
+							</tr>
+						</table>
+						<br> 
+						<input type='hidden' name='apk_id' id='id_apk_id' value='' />
+						<input type='button' value='Save Apk Info' onClick='onClickSaveApkInfo()' />
+					<br>
+					</div>
+
+				</div>
+				<!-- apk_upload end -->
+			</div>
+			<!-- main end -->
+		</div>
+		<!-- contents end -->
+
+		<!--  dummy iframe for upload icon -->
+		<iframe id="file_upload_target" name="file_upload_target" src="#" style="width:0;height:0;border:0px solid #fff;"></iframe> 
+{% endblock %}

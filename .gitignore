@@ -1,0 +1,6 @@
+venv
+*.py
+.project
+.pydevproject
+!server/media/verification/readme.txt
+

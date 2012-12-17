@@ -1,0 +1,65 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-Script-Type" content="text/javascript" />
+<meta http-equiv="imagetoolbar" content="no" />
+<meta name="description" content="" />
+<meta name="keywords" content="" />
+<link rel="stylesheet" href="{{ STATIC_URL }}css/common.css" type="text/css" />
+<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/common.js"></script>
+<title>{{ title }} 
+</title>
+</head>
+<body>
+	<div id="top">
+		<div id="header">
+			<h1>{{ title }} {{ user.username }}</h1>
+		</div>
+		<div id="contents">
+			<div id="main">
+				<h4>What is ACCESS Market</h4>
+				<p>
+					<img src='{{ STATIC_URL }}images/access_market_icon.png' align='right'
+						title='ACCESS Market ICON' hspace='50px' vspace='10px'>
+					Anybody of ACCESS can use this system to release Android application internally.<br>ACCESS There are some application to download only from this Market. Please don't hesitate to download and user it.<br> <br> <a href='./request/dl_market/com.access_company.appstore'><img
+						src='{{ STATIC_URL }}images/button_download.gif'> </a><br>
+						The latest version : <?php print($recent_market_version);?>
+				</p>
+				<br>
+				<h4>More detail</h4>
+				<p>
+					You can download via only ACCESS internal network(acj, artifact, visitor).<b>It is prohibitted to download from out of ACCESS.</b><br>
+					You can get notification when the latest application is updated or registered.<br>
+
+				</p>
+				<br>
+				<h4>Application distributor has to register new account in here.</h4>
+				<p>
+					<a href='/devcenter/'>ACCESS Market DEVELOPER CONSOLE</a>
+				</p>
+
+				<ul>
+					<li>You can distribute your application with ease and simple operation.</li>
+					<li>You can get the count of each apk download.</li>
+					<li>You can utilize to test, because it is possible to download old version apk.</li>
+					<li>You can make limitation to download each apk with password setting.</li>
+					<li>Please contact to ACCESS Market development team<a href="mailto:proost_a-gr@access-company.com">to have Q&A</a>から</li>
+				</ul>
+			</div>
+			<!-- main end -->
+		</div>
+		<!-- contents end -->
+		<div id="footer">
+			<div class="copyright">
+				<?php displayCopyRight(); ?>
+			</div>
+		</div>
+		<!-- footer end -->
+
+	</div>
+	<!-- top end -->
+</body>
+</html>

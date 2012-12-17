@@ -1,0 +1,32 @@
+{% extends "base_devcenter.html" %}
+
+{% block content %}
+<div id="contents">
+	<div id="main">
+		<h2>Login</h2>
+		<center>
+			<br>
+			<form action="" method="POST">
+			{% csrf_token %}
+				<table>
+					<tr>
+						<td align='right'><label for="id_username">Account:</label></td>
+						<td>{{ form.username }}</td>
+					</tr>
+					<tr>
+						<td align='right'><label for="id_password">Password:</label></td>
+						<td>{{ form.password }}</td>
+					</tr>
+				</table>
+				<input type="hidden" name="next" value="/devcenter/" />
+				<input type="submit" value="Log-in" />
+			</form>
+			<br> 
+			<strong> 
+				<a href='/accounts/register'>Create Account</a>
+			</strong> <br/> <br/>
+		</center>
+	</div>
+	<!-- main end -->
+</div>
+{% endblock %}

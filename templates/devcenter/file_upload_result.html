@@ -1,0 +1,11 @@
+<script language="javascript" type="text/javascript">
+{% if target == 'icon' %}
+	window.top.window.ResultUploadIcon({{ id }}, '{{ error_msg }}');
+{% elif target == 'cimage' %}
+	window.top.window.ResultUploadCImage({{ id }}, '{{ error_msg }}');
+{% elif target == 'cimage_change' %}
+	window.top.window.ResultChangeCImage({{ id }}, '{{ error_msg }}');
+{% elif target == 'pimage' %}
+	window.top.window.ResultUploadPImage({{ id }}, '{{ error_msg }}');
+{% endif %}
+</script>

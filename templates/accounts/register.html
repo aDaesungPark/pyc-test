@@ -1,0 +1,46 @@
+{% extends "base_devcenter.html" %}
+
+{% block content %}
+<div id="contents">
+	<div id="main">
+		<h2>Create Author</h2>
+		<center>
+			<br/>
+			<form action='' method='POST'>
+			{% csrf_token %}
+				<input type='hidden' name='method' value='create'>
+				<table>
+					<tr>
+						<td align='right'>Account:</td>
+						<td>
+							<input type='text' name='username'	style='ime-mode: disabled' size='50' />
+						</td>
+					</tr>
+					<tr>
+						<td align='right'>Password:</td>
+						<td>
+							<input type='password' name='password1' style='ime-mode: disabled' size='50' />
+						</td>
+					</tr>
+					<tr>
+						<td align='right'>Password confirmation:</td>
+						<td>
+							<input type='password' name='password2' style='ime-mode: disabled' size='50' />
+						</td>
+					</tr>
+					<tr>
+						<td align='right'>Email:</td>
+						<td>
+							<input type='text' name='email' size='50'>
+						</td>
+					</tr>
+				</table>
+				<input type='submit' value='Create Account' />
+				<br /> <br />
+			</form>
+		</center>
+	</div>
+	<!-- main end -->
+</div>
+
+{% endblock %}

@@ -1,0 +1,114 @@
+{% extends "base_devcenter.html" %}
+
+{% block more_js %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/easy.notification.js"></script>
+{% endblock %}
+
+{% block internal_js %}
+<script type='text/javascript'>
+//Sending message
+displayNotification('');
+
+//Go to register application
+function gotoCreateApp(author_id) {
+	gotoPage('create_app.php', author_id, -1);
+}
+
+//Go to edit application
+function gotoEditApp(author_id, app_id) {
+	gotoPage('/devcenter/edit_app', author_id, app_id);
+}
+
+//Go to detail information page
+function gotoDownloadInfo(author_id, app_id) {
+	gotoPage('info_download.php', author_id, app_id);
+}
+
+//Go to comment information page
+function gotoCommentInfo(author_id, app_id) {
+	gotoPage('comment_info.php', author_id, app_id);
+}
+</script>
+{% endblock %}
+
+{% block pr %}
+{% if user.is_authenticated %}
+<div class="pr">
+	<h4>
+		<a href='javascript:void(0)'  id='jquery-api-slideDown-fast'>{{ user.username }}({{ user.email }})</a><br>
+		<div id='jquery-api-slideDown-fast-contents'<br>
+			<a href='javascript:void(0)' onClick='gotoEditAuthorPage(28)'>Edit profile</a><br>
+			<a href='/devcenter/logout/'>Log-out</a><br>
+		</div>
+	</h4>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block content %} 
+<div id="contents">
+	<div id="main">
+		<h2>Application List</h2>
+		<br>
+		{% if reg_appclass_list %}
+		<h3>Registered Application</h1>
+		<table>
+			{% for appclass in reg_appclass_list %}
+			<tr>
+        		<td width='50px'>
+            		<img width='50px' height='50px' src='/devcenter/icon/{{ appclass.app_model.id }}'>
+        		</td>
+        		<td width='200px'>
+        			<strong>
+        				<a href='javascript:void(0);' onClick='gotoEditApp({{ appclass.app_model.author_id }}, {{ appclass.app_model.id }})'>{{ appclass.app_model.app_name }}</a>
+        			</strong>
+            		<br>{{ appclass.recent_apk_model.version_name }}
+            	</td>
+        		<td width='200px'>The count of registered : {{ appclass.reg_apk_count }}<br/>
+        			The count of verifying : {{ appclass.vrf_apk_count }}
+        		</td>
+        		<td width='200px'>The count of download: 0 count<br>
+            		<a href='javascript:void(0);' onClick='gotoDownloadInfo(23,38)'>Statistics information</a>
+        		</td>
+        		<td>
+        			<a href='javascript:void(0);' onClick='gotoCommentInfo(23,38)'>Comment(0)</a>
+        		</td>
+    		</tr>
+    		{% endfor %}
+		
+		</table>
+		{% endif %}
+
+		{% if vrf_appclass_list %}
+		<h3>Verifying Application</h3>
+		<table>
+			{% for appclass in vrf_appclass_list %}
+			<tr>
+        		<td width='50px'>
+            		<img width='50px' height='50px' src='/devcenter/icon/{{ appclass.app_model.id }}'>
+        		</td>
+        		<td width='200px'>
+        			<strong>
+        				<a href='javascript:void(0);' onClick='gotoEditApp({{ appclass.app_model.author_id }}, {{ appclass.app_model.id }})'>{{ appclass.app_model.app_name }}</a>
+        			</strong>
+            	</td>
+        		<td>This application is not finished verification yet</td>
+    		</tr>
+    		{% endfor %}
+   		</table>
+		{% endif %}
+		
+		{% if not reg_appclass_list and not vrf_appclass_list %}
+			No application registered<br/>
+		{% endif %}
+		
+		<br/>
+		<strong>
+			<!-- <a href='javascript:void(0)' onClick='gotoCreateApp(27)'>Register new application</a>  -->
+			<a href='/devcenter/create_app'>Register new application</a>
+		</strong> <br> <br>
+	</div>
+	<!-- main end -->
+</div>
+<!-- contents end -->
+{% endblock %}
