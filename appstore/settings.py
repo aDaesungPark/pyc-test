@@ -16,8 +16,8 @@ if os.environ.has_key('LOCAL_DEV'):
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
             'NAME': 'appstoredb',                      # Or path to database file if using sqlite3.
-            'USER': 'parfois',                      # Not used with sqlite3.
-            'PASSWORD': 'vhtmxmelql',                  # Not used with sqlite3.
+            'USER': 'appstore',                      # Not used with sqlite3.
+            'PASSWORD': 'doqstore',                  # Not used with sqlite3.
             'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
             'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
         }
@@ -169,9 +169,3 @@ LOGGING = {
 
 VERIFY_DIR = os.path.realpath(os.path.join(MEDIA_ROOT, 'verification'))
 TOOLS_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'tools'))
-# need to set up loacal smtp server or use commecail smtp
-EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'accessappstore@gmail.com'
-EMAIL_HOST_PASSWORD = 'doqstore'
