@@ -1,0 +1,99 @@
+--
+-- `apk_table`
+--
+
+CREATE TABLE IF NOT EXISTS `apk_table` (
+  `_id` int(10) NOT NULL auto_increment,
+  `app_id` int(10) NOT NULL default '0',
+  `apk_name` varchar(100) NOT NULL default 'no file_name',
+  `version_name` varchar(100) NOT NULL default 'no version_name',
+  `version_code` int(10) NOT NULL default '0',
+  `update_date_time` datetime NOT NULL,
+  `recent_change` varchar(1000) NOT NULL,
+  `passwd` varchar(100) NOT NULL,
+  UNIQUE KEY `file_name` (`apk_name`),
+  KEY `_id` (`_id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=107 ;
+
+-- --------------------------------------------------------
+
+--
+-- `app_table`
+--
+
+CREATE TABLE IF NOT EXISTS `app_table` (
+  `_id` int(10) NOT NULL auto_increment,
+  `app_name` varchar(100) NOT NULL default 'no app_name',
+  `package_name` varchar(100) NOT NULL default 'no package_name',
+  `author_id` int(10) NOT NULL default '1',
+  `category_id` int(10) NOT NULL default '1',
+  `icon_name` varchar(100) NOT NULL default 'hoge',
+  `description` varchar(1000) NOT NULL default 'no description',
+  `recent_apk_id` int(100) NOT NULL,
+  UNIQUE KEY `app_name` (`app_name`),
+  KEY `_id` (`_id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=31 ;
+
+-- --------------------------------------------------------
+
+--
+-- `author_table`
+--
+
+CREATE TABLE IF NOT EXISTS `author_table` (
+  `_id` int(10) NOT NULL auto_increment,
+  `name` varchar(100) NOT NULL default 'no name',
+  `email` varchar(100) NOT NULL,
+  `passwd` varchar(100) NOT NULL,
+  KEY `_id` (`_id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=23 ;
+
+-- --------------------------------------------------------
+
+--
+-- `category_table`
+--
+
+CREATE TABLE IF NOT EXISTS `category_table` (
+  `_id` int(10) NOT NULL auto_increment,
+  `name` varchar(100) NOT NULL default 'no name',
+  KEY `_id` (`_id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
+
+-- --------------------------------------------------------
+
+--
+-- `comment_table`
+--
+
+CREATE TABLE IF NOT EXISTS `comment_table` (
+  `_id` int(11) NOT NULL auto_increment,
+  `app_id` int(11) NOT NULL,
+  `version_code` int(11) NOT NULL,
+  `version_name` varchar(100) character set utf8 NOT NULL,
+  `imei` varchar(100) character set utf8 NOT NULL,
+  `model` varchar(100) character set utf8 NOT NULL,
+  `version_release` varchar(100) character set utf8 NOT NULL,
+  `user_name` varchar(100) character set utf8 NOT NULL,
+  `comment` varchar(1000) character set utf8 NOT NULL,
+  `date_time` datetime NOT NULL,
+  PRIMARY KEY  (`_id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=19 ;
+
+-- --------------------------------------------------------
+
+--
+-- `dl_record_table`
+--
+
+CREATE TABLE IF NOT EXISTS `dl_record_table` (
+  `_id` int(100) NOT NULL auto_increment,
+  `apk_id` int(100) NOT NULL,
+  `model` varchar(1000) NOT NULL default 'no model',
+  `version_release` varchar(1000) NOT NULL default 'no version_release',
+  `app_id` int(100) NOT NULL,
+  `date_time` datetime NOT NULL,
+  `imei` varchar(1000) NOT NULL,
+  `market_version_code` int(100) NOT NULL,
+  KEY `_id` (`_id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=583 ;
